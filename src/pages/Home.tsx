@@ -3,29 +3,15 @@ import { CATEGORIES } from '../lib/categories'
 import { useMeta } from '../lib/useMeta'
 import { useProducts } from '../lib/ProductsContext'
 import { GENERAL_MESSAGE, productMessage } from '../lib/whatsapp'
-import type { Product } from '../lib/types'
-import { ProductGrid } from '../components/ProductGrid'
 import { ProductImage } from '../components/ProductImage'
 import { WhatsAppButton } from '../components/WhatsAppButton'
-
-function pickHighlights(products: Product[], star?: Product): Product[] {
-  const pool = products.filter((p) => p.id !== star?.id)
-  const picks: Product[] = []
-  for (const c of CATEGORIES) {
-    const first = pool.find((p) => p.category === c.slug)
-    if (first) picks.push(first)
-  }
-  for (const p of pool) if (picks.length < 4 && !picks.includes(p)) picks.push(p)
-  return picks.slice(0, 4)
-}
 
 export default function Home() {
   useMeta(
     'DON PABON — Panadería artesanal | Tradición en cada bocado',
     'Pan fresco, recetas auténticas y el sabor de siempre. Panes, dulces, salados y especialidades navideñas de DON PABON. Pide por WhatsApp.',
   )
-  const { products, featured, status } = useProducts()
-  const highlights = pickHighlights(products, featured)
+  const { featured, status } = useProducts()
 
   return (
     <>
@@ -111,12 +97,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* DESTACADOS */}
-      <section className="mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:px-8" aria-labelledby="destacados">
-        <p className="text-[0.7rem] font-semibold tracking-[0.4em] text-accent">PRODUCTOS DESTACADOS</p>
-        <h2 id="destacados" className="mt-3 mb-8 text-3xl font-extrabold sm:text-4xl">Para empezar a disfrutar</h2>
-        <ProductGrid products={highlights} emptyText="Pronto verás aquí nuestros productos." />
-      </section>
     </>
   )
 }

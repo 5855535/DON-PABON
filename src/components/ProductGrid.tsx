@@ -2,7 +2,7 @@ import { useProducts } from '../lib/ProductsContext'
 import type { Product } from '../lib/types'
 import { ProductCard, ProductCardSkeleton } from './ProductCard'
 
-const GRID = 'grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-5'
+const GRID = 'grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4'
 
 export function ProductGrid({ products, emptyText = 'Aún no hay productos en esta categoría.' }: { products: Product[]; emptyText?: string }) {
   const { status, reload } = useProducts()
@@ -42,7 +42,7 @@ export function ProductGrid({ products, emptyText = 'Aún no hay productos en es
   return (
     <ul className={GRID}>
       {products.map((p) => (
-        <li key={p.id} className="contents">
+        <li key={p.id}>
           <ProductCard product={p} />
         </li>
       ))}
