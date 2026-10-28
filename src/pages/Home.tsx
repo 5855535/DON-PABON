@@ -50,8 +50,29 @@ export default function Home() {
         <div className="shimmer aspect-[16/9] rounded-2xl sm:aspect-[21/8]" aria-hidden="true" />
       )}
 
+      {/* Producto estrella */}
+      {status === 'ready' && featured && (
+        <section className="mt-4" aria-labelledby="estrella">
+          <button
+            type="button"
+            onClick={() => setStarOpen(true)}
+            aria-label={`Ver ${featured.name}`}
+            className="group flex w-full overflow-hidden rounded-2xl border border-accent/40 bg-card text-left shadow-[0_10px_30px_-18px_rgb(235_166_93/0.5)] transition hover:border-accent"
+          >
+            <ProductImage src={featured.image_url} alt="" className="aspect-square w-[34%] shrink-0 sm:w-40" />
+            <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 p-4">
+              <span className="text-[0.62rem] font-bold tracking-[0.18em] text-accent">★ EL FAVORITO DE LA CASA</span>
+              <span id="estrella" className="text-base font-extrabold leading-tight">{featured.name}</span>
+              {featured.description && <span className="line-clamp-2 text-[0.78rem] text-mute">{featured.description}</span>}
+              <span className="mt-1 text-xs font-semibold text-accent transition group-hover:translate-x-1">Ver producto →</span>
+            </span>
+          </button>
+          {starOpen && <ProductModal product={featured} onClose={() => setStarOpen(false)} />}
+        </section>
+      )}
+
       {/* Intro mínima */}
-      <section className="mt-5 text-center">
+      <section className="mt-6 text-center">
         <p className="font-script text-[1.7rem] leading-none text-accent">Tradición en cada bocado</p>
         <p className="mt-2 text-[0.85rem] text-mute">Pan fresco, recetas auténticas y el sabor de siempre.</p>
         <nav aria-label="Categorías" className="mt-3 flex flex-wrap justify-center gap-2 lg:hidden">
@@ -78,27 +99,6 @@ export default function Home() {
               </li>
             ))}
           </ul>
-        </section>
-      )}
-
-      {/* Producto estrella */}
-      {status === 'ready' && featured && (
-        <section className="mt-9" aria-labelledby="estrella">
-          <button
-            type="button"
-            onClick={() => setStarOpen(true)}
-            aria-label={`Ver ${featured.name}`}
-            className="group flex w-full overflow-hidden rounded-2xl border border-line bg-card text-left transition hover:border-accent/50"
-          >
-            <ProductImage src={featured.image_url} alt="" className="aspect-square w-[34%] shrink-0 sm:w-40" />
-            <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 p-4">
-              <span className="text-[0.62rem] font-bold tracking-[0.18em] text-accent">★ EL FAVORITO DE LA CASA</span>
-              <span id="estrella" className="text-base font-extrabold leading-tight">{featured.name}</span>
-              {featured.description && <span className="line-clamp-2 text-[0.78rem] text-mute">{featured.description}</span>}
-              <span className="mt-1 text-xs font-semibold text-accent transition group-hover:translate-x-1">Ver producto →</span>
-            </span>
-          </button>
-          {starOpen && <ProductModal product={featured} onClose={() => setStarOpen(false)} />}
         </section>
       )}
     </div>
