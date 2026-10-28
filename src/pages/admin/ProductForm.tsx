@@ -161,7 +161,7 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: Prop
           </label>
           <label className="flex min-h-10 items-center gap-3 text-sm">
             <input type="checkbox" checked={bestseller} onChange={(e) => setBestseller(e.target.checked)} className="h-5 w-5 accent-[#EBA65D]" />
-            Más pedido (aparece en el inicio)
+            Recomendado (aparece en el inicio)
           </label>
           <label className="flex min-h-10 items-center gap-3 text-sm">
             <input type="checkbox" checked={featured && active} disabled={!active} onChange={(e) => setFeatured(e.target.checked)} className="h-5 w-5 accent-[#EBA65D]" />

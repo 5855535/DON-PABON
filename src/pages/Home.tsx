@@ -98,10 +98,10 @@ export default function Home() {
         </nav>
       </section>
 
-      {/* Los más pedidos (se asignan desde el panel) */}
+      {/* Lo recomendado (se asigna desde el panel) */}
       {status === 'ready' && bestsellers.length > 0 && (
-        <section className="mt-9" aria-labelledby="mas-pedidos">
-          <h2 id="mas-pedidos" className="text-[0.7rem] font-bold tracking-[0.3em] text-accent">LOS MÁS PEDIDOS</h2>
+        <section className="mt-9" aria-labelledby="recomendado">
+          <h2 id="recomendado" className="text-[0.7rem] font-bold tracking-[0.3em] text-accent">LO RECOMENDADO</h2>
           <ul className="-mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:px-0 lg:grid lg:grid-cols-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden">
             {bestsellers.map((p) => (
               <li key={p.id} className="flex w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-auto">

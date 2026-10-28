@@ -82,7 +82,7 @@ export function ProductsPanel() {
   return (
     <>
       <p className="text-xs text-mute">
-        Estrella: <strong className="text-accent">{star ? star.name : 'ninguno'}</strong> · Más pedidos en el inicio:{' '}
+        Estrella: <strong className="text-accent">{star ? star.name : 'ninguno'}</strong> · Recomendados en el inicio:{' '}
         <strong className="text-accent">{bestCount}</strong> (se muestran hasta 8)
       </p>
 
@@ -103,7 +103,7 @@ export function ProductsPanel() {
           <button type="submit" className={primaryBtn}>Guardar</button>
           {labelMsg && <span role="status" className="text-xs text-mute">{labelMsg}</span>}
         </div>
-        <p className="mt-1 text-[0.7rem] text-mute">Ej.: «Recomendado del chef», «Lo más pedido». Déjalo vacío para volver a «{DEFAULT_FEATURED_LABEL}».</p>
+        <p className="mt-1 text-[0.7rem] text-mute">Ej.: «Recomendado del chef», «El favorito del día». Déjalo vacío para volver a «{DEFAULT_FEATURED_LABEL}».</p>
       </form>
 
       <div role="tablist" aria-label="Categorías" className="mt-3 flex flex-wrap items-center gap-2">
@@ -134,7 +134,7 @@ export function ProductsPanel() {
               <p className="text-[0.7rem] text-mute">
                 {p.is_active ? 'Activo' : 'Oculto'}
                 {p.is_featured && <span className="ml-2 font-semibold text-accent">★ Estrella</span>}
-                {p.is_bestseller && <span className="ml-2 font-semibold text-accent">▲ Más pedido</span>}
+                {p.is_bestseller && <span className="ml-2 font-semibold text-accent">▲ Recomendado</span>}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
@@ -143,10 +143,10 @@ export function ProductsPanel() {
               <button
                 className={`${btn} ${p.is_bestseller ? 'border-accent text-accent' : ''}`}
                 aria-pressed={p.is_bestseller}
-                title="Más pedido (aparece en el inicio)"
+                title="Recomendado (aparece en el inicio)"
                 onClick={() => run(() => setBestseller(p.id, !p.is_bestseller))}
               >
-                {p.is_bestseller ? '▲ Más pedido' : '△ Más pedido'}
+                {p.is_bestseller ? '▲ Recomendado' : '△ Recomendado'}
               </button>
               <button
                 className={`${btn} ${p.is_featured ? 'border-accent text-accent' : ''}`}

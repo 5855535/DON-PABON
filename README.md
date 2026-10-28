@@ -76,7 +76,7 @@ Los textos están en `src/lib/whatsapp.ts`. Tras cambiar el `.env` hay que **rec
 
 Tres pestañas:
 
-- **Productos**: crear/editar/eliminar, categoría, activar/ocultar, **producto estrella** (con el texto de su etiqueta editable, p. ej. «Recomendado del chef»), **Más pedido** (los marcados aparecen en el inicio, hasta 8), reordenar (↑ ↓),
+- **Productos**: crear/editar/eliminar, categoría, activar/ocultar, **producto estrella** (con el texto de su etiqueta editable, p. ej. «Recomendado del chef»), **Recomendado** (los marcados aparecen en el inicio, hasta 8), reordenar (↑ ↓),
 subir/reemplazar imagen (se redimensiona a ≤1600 px y se convierte a **WebP** en el navegador; la imagen
 anterior se borra del bucket y, si falla el guardado, se elimina la recién subida para no dejar huérfanos) y
 «Vista previa» del catálogo público.
