@@ -100,6 +100,27 @@ enrutado SPA). Define allí `WHATSAPP_PHONE`, `VITE_SUPABASE_URL` y `VITE_SUPABA
 - `public/images/hero.webp` y `cat-*.webp`: portada del inicio y de cada categoría. Sustitúyelos por fotos
   propias (hero ≥ 1600 px de ancho recomendado) conservando el nombre.
 
+## Tamaños de imágenes
+
+| Dónde | Proporción | Tamaño recomendado | Notas |
+|---|---|---|---|
+| Fotos de productos | 4:3 horizontal | **1200 × 900 px** (mínimo 800 × 600) | Producto centrado. Se muestra también recortada en cuadrado (producto estrella) y a 16:10 en el modal del celular. |
+| Banners del inicio | 16:9 | **1600 × 900 px** | En celular se ve completo; en pantallas grandes se recorta arriba y abajo (≈ 21:8), así que deja lo importante en la franja central. |
+| Portada por defecto (`public/images/hero.webp`) | 16:9 | 1600 × 900 px | Solo se usa si no hay banners activos. |
+| Imagen al compartir en redes (`og:image`) | 1.91:1 | 1200 × 630 px | Opcional. Hoy usa `hero.webp`; para que las redes la muestren bien conviene una URL absoluta del dominio final. |
+
+El panel redimensiona a un máximo de 1600 px y convierte a WebP; no hace falta optimizar antes (acepta hasta 15 MB).
+Las imágenes `public/images/cat-*.webp` ya no se muestran en la web.
+
+## QR con forma de pan
+
+```bash
+node scripts/qr-pan.mjs https://TU-SITIO.netlify.app
+```
+
+Genera en `qr/` el QR (pan de molde) en versión oscura y clara, en SVG (vectorial, para imprenta) y PNG (1500 px),
+y comprueba automáticamente que se pueda leer. Tamaño de impresión mínimo recomendado: 4 × 4 cm la zona del código.
+
 ## Pruebas realizadas
 
 - `npm run build` (tsc + vite) sin errores.
