@@ -8,7 +8,14 @@ const inputCls =
   'min-h-12 w-full rounded-xl border border-line bg-soft px-4 text-ink placeholder:text-mute/60 focus:border-accent focus:outline-none'
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <section className="mx-auto max-w-md px-4 py-12">{children}</section>
+  return (
+    <section className="mx-auto max-w-md px-4 py-12">
+      {children}
+      <p className="mt-4 text-center text-xs">
+        <a href="/" className="text-mute underline-offset-4 hover:text-accent hover:underline">← Volver al sitio</a>
+      </p>
+    </section>
+  )
 }
 
 function Login() {

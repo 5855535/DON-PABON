@@ -100,6 +100,15 @@ enrutado SPA). Define allí `WHATSAPP_PHONE`, `VITE_SUPABASE_URL` y `VITE_SUPABA
 - `public/images/hero.webp` y `cat-*.webp`: portada del inicio y de cada categoría. Sustitúyelos por fotos
   propias (hero ≥ 1600 px de ancho recomendado) conservando el nombre.
 
+## App instalable del panel de administración (PWA)
+
+Los admins pueden instalar el panel en el celular como una app (icono propio, pantalla completa, abre directo en `/admin/`).
+
+- **Android (Chrome):** entra a `/admin`, inicia sesión y toca **⬇ Instalar app** (o menú ⋮ → «Instalar app»).
+- **iPhone (Safari):** entra a `/admin`, inicia sesión, toca **⬇ Instalar app** y sigue la ayuda: Compartir → «Añadir a pantalla de inicio».
+- La web pública **no** es instalable: el `manifest` solo se enlaza dentro del panel, y únicamente después de iniciar sesión como admin. El botón de instalar solo lo ven admins.
+- Importante: ningún navegador permite *prohibir* técnicamente la instalación de una página. Lo que se garantiza es que la app instalada solo abre el panel, y el panel exige usuario y contraseña de una cuenta registrada en la tabla `admins` (RLS en la base de datos). Un usuario sin cuenta admin no puede ver ni cambiar nada.
+- Archivos: `public/admin.webmanifest`, `public/admin/sw.js` (service worker mínimo, sin caché de datos), `public/icons/admin-*.png` (se regeneran con `node scripts/pwa-icons.mjs`), `src/pages/admin/InstallApp.tsx`.
 ## Tamaños de imágenes
 
 | Dónde | Proporción | Tamaño recomendado | Notas |

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { btn } from './ui'
 import { BannersPanel } from './BannersPanel'
+import { InstallApp } from './InstallApp'
 import { MetricsPanel } from './MetricsPanel'
 import { ProductsPanel } from './ProductsPanel'
 
@@ -17,7 +18,11 @@ export default function Dashboard({ onSignOut }: { onSignOut: () => void }) {
     <section className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-extrabold">Administración</h1>
-        <button className={btn} onClick={onSignOut}>Cerrar sesión</button>
+        <div className="flex flex-wrap items-center gap-2">
+          <InstallApp />
+          <a href="/" target="_blank" rel="noopener noreferrer" className={btn}>Ver sitio ↗</a>
+          <button className={btn} onClick={onSignOut}>Cerrar sesión</button>
+        </div>
       </div>
 
       <div role="tablist" aria-label="Secciones" className="mt-4 flex gap-1 border-b border-line">

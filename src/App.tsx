@@ -23,6 +23,7 @@ function RouteEffects() {
 }
 
 export default function App() {
+  const inAdmin = useLocation().pathname.startsWith('/admin')
   return (
     <ProductsProvider>
       <AuthProvider>
@@ -30,8 +31,8 @@ export default function App() {
           Saltar al contenido
         </a>
         <RouteEffects />
-        <Navbar />
-        <main id="contenido" className="pt-14">
+        {!inAdmin && <Navbar />}
+        <main id="contenido" className={inAdmin ? 'pb-10' : 'pt-14'}>
           <Suspense fallback={<div className="grid min-h-[60vh] place-items-center text-mute">Cargando…</div>}>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -41,7 +42,7 @@ export default function App() {
             </Routes>
           </Suspense>
         </main>
-        <Footer />
+        {!inAdmin && <Footer />}
       </AuthProvider>
     </ProductsProvider>
   )
