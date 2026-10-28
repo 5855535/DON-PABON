@@ -9,35 +9,34 @@ const DEMO_BANNERS: Banner[] = [
   { id: 'demo-b3', title: 'El sabor de la tradición', image_url: '/images/cat-navideno.webp', image_path: null, display_order: 30, is_active: true },
 ]
 
-const COLS = 'id,title,image_url,image_path,display_order,is_active'
+const COLS = 'id,title,image_url,image_path,link,display_order,is_active'
+// Respaldo por si aún no se ejecutó la migración del enlace (columna `link`).
+const COLS_NO_LINK = 'id,title,image_url,image_path,display_order,is_active'
+
+async function selectBanners(active: boolean): Promise<Banner[]> {
+  const run = (cols: string) => {
+    let q = db().from('banners').select(cols)
+    if (active) q = q.eq('is_active', true)
+    return q.order('display_order', { ascending: true }).order('created_at', { ascending: true })
+  }
+  let { data, error } = await run(COLS)
+  if (error) ({ data, error } = await run(COLS_NO_LINK))
+  if (error) throw error
+  return data as unknown as Banner[]
+}
 
 export async function fetchActiveBanners(): Promise<Banner[]> {
   if (DEMO_MODE) return DEMO_BANNERS
-  const { data, error } = await db()
-    .from('banners')
-    .select(COLS)
-    .eq('is_active', true)
-    .order('display_order', { ascending: true })
-    .order('created_at', { ascending: true })
-  if (error) throw error
-  return data as Banner[]
+  return selectBanners(true)
 }
 
-export async function fetchAllBanners(): Promise<Banner[]> {
-  const { data, error } = await db()
-    .from('banners')
-    .select(COLS)
-    .order('display_order', { ascending: true })
-    .order('created_at', { ascending: true })
-  if (error) throw error
-  return data as Banner[]
-}
+export const fetchAllBanners = () => selectBanners(false)
 
-export async function createBanner(file: File, title: string, nextOrder: number) {
+export async function createBanner(file: File, title: string, nextOrder: number, link: string | null = null) {
   const up = await uploadImage(file, 'banners')
   const { error } = await db()
     .from('banners')
-    .insert({ title: title.trim() || null, image_url: up.url, image_path: up.path, display_order: nextOrder })
+    .insert({ title: title.trim() || null, image_url: up.url, image_path: up.path, display_order: nextOrder, ...(link ? { link } : {}) })
   if (error) {
     await removeImage(up.path)
     throw error
@@ -54,7 +53,7 @@ export async function replaceBannerImage(banner: Banner, file: File) {
   await removeImage(banner.image_path)
 }
 
-export async function updateBanner(id: string, patch: Partial<Pick<Banner, 'title' | 'is_active'>>) {
+export async function updateBanner(id: string, patch: Partial<Pick<Banner, 'title' | 'is_active' | 'link'>>) {
   const { error } = await db().from('banners').update(patch).eq('id', id)
   if (error) throw error
 }

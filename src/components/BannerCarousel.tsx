@@ -1,7 +1,46 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
+import { getCategory } from '../lib/categories'
+import { track } from '../lib/metrics'
 import type { Banner } from '../lib/types'
+import { GENERAL_MESSAGE, whatsappUrl } from '../lib/whatsapp'
 
 const INTERVAL = 5000
+
+/** Envuelve el contenido de un banner en el enlace que corresponda (categoría, producto o WhatsApp). */
+function SlideLink({ banner, focusable, children }: { banner: Banner; focusable: boolean; children: ReactNode }) {
+  const link = banner.link ?? ''
+  const tab = focusable ? 0 : -1
+  const label = banner.title ?? 'Ver más'
+  if (link === 'whatsapp')
+    return (
+      <a
+        href={whatsappUrl(GENERAL_MESSAGE)}
+        target="_blank"
+        rel="noopener noreferrer"
+        tabIndex={tab}
+        aria-label={`${label} (pedir por WhatsApp, se abre en una pestaña nueva)`}
+        draggable={false}
+        onClick={() => track('whatsapp_click', undefined, 'banner')}
+        className="block"
+      >
+        {children}
+      </a>
+    )
+  if (link.startsWith('category:') && getCategory(link.slice(9)))
+    return (
+      <Link to={`/${link.slice(9)}`} tabIndex={tab} aria-label={`${label} — ver ${getCategory(link.slice(9))!.label}`} draggable={false} className="block">
+        {children}
+      </Link>
+    )
+  if (link.startsWith('product:'))
+    return (
+      <Link to={`/?p=${link.slice(8)}`} tabIndex={tab} aria-label={`${label} — ver producto`} draggable={false} className="block">
+        {children}
+      </Link>
+    )
+  return <>{children}</>
+}
 
 /** Carrusel que desliza hacia la izquierda (infinito), con swipe táctil, puntos y pausa al interactuar. */
 export function BannerCarousel({ banners }: { banners: Banner[] }) {
@@ -68,24 +107,28 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
         onTransitionEnd={onEnd}
       >
         {slides.map((b, idx) => (
-          <div key={`${b.id}-${idx}`} className="relative aspect-[16/9] w-full shrink-0 sm:aspect-[21/8]" aria-hidden={idx !== active && idx !== i}>
-            <img
-              src={b.image_url}
-              alt={b.title ?? ''}
-              loading={idx === 0 ? 'eager' : 'lazy'}
-              fetchPriority={idx === 0 ? 'high' : 'auto'}
-              decoding="async"
-              draggable={false}
-              className="h-full w-full select-none object-cover"
-            />
-            {b.title && (
-              <>
-                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/75 to-transparent" />
-                <p className="absolute bottom-3 left-4 right-4 font-script text-2xl leading-none text-ink drop-shadow sm:bottom-5 sm:left-6 sm:text-3xl">
-                  {b.title}
-                </p>
-              </>
-            )}
+          <div key={`${b.id}-${idx}`} className="w-full shrink-0" aria-hidden={idx !== active && idx !== i}>
+            <SlideLink banner={b} focusable={idx === i}>
+              <div className="relative aspect-[16/9] w-full sm:aspect-[21/8]">
+                <img
+                  src={b.image_url}
+                  alt={b.title ?? ''}
+                  loading={idx === 0 ? 'eager' : 'lazy'}
+                  fetchPriority={idx === 0 ? 'high' : 'auto'}
+                  decoding="async"
+                  draggable={false}
+                  className="h-full w-full select-none object-cover"
+                />
+                {b.title && (
+                  <>
+                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/75 to-transparent" />
+                    <p className="absolute bottom-3 left-4 right-4 font-script text-2xl leading-none text-ink drop-shadow sm:bottom-5 sm:left-6 sm:text-3xl">
+                      {b.title}
+                    </p>
+                  </>
+                )}
+              </div>
+            </SlideLink>
           </div>
         ))}
       </div>

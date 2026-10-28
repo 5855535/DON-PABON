@@ -29,6 +29,8 @@ export interface Banner {
   title: string | null
   image_url: string
   image_path: string | null
+  /** null | 'whatsapp' | 'category:<slug>' | 'product:<id>' */
+  link?: string | null
   display_order: number
   is_active: boolean
 }

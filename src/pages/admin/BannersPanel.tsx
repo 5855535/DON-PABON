@@ -7,8 +7,31 @@ import {
   saveBannerOrder,
   updateBanner,
 } from '../../lib/banners'
-import type { Banner } from '../../lib/types'
+import { CATEGORIES } from '../../lib/categories'
+import { fetchAllProducts } from '../../lib/products'
+import type { Banner, Product } from '../../lib/types'
 import { btn, errMsg, inputCls, primaryBtn } from './ui'
+
+function LinkSelect({ value, onChange, products, label, disabled }: { value: string; onChange: (v: string) => void; products: Product[]; label: string; disabled?: boolean }) {
+  const known = value === '' || value === 'whatsapp' || value.startsWith('category:') || products.some((p) => value === `product:${p.id}`)
+  return (
+    <select aria-label={label} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} className={`${inputCls} min-h-10 max-w-full py-1 text-xs`}>
+      <option value="">Sin enlace</option>
+      <option value="whatsapp">WhatsApp (pedido general)</option>
+      <optgroup label="Abrir una categoría">
+        {CATEGORIES.map((c) => (
+          <option key={c.slug} value={`category:${c.slug}`}>{c.label}</option>
+        ))}
+      </optgroup>
+      <optgroup label="Abrir un producto">
+        {products.map((p) => (
+          <option key={p.id} value={`product:${p.id}`}>{p.name}</option>
+        ))}
+      </optgroup>
+      {!known && <option value={value}>(enlace no disponible)</option>}
+    </select>
+  )
+}
 
 export function BannersPanel() {
   const [banners, setBanners] = useState<Banner[]>([])
@@ -17,6 +40,8 @@ export function BannersPanel() {
   const [busy, setBusy] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
+  const [link, setLink] = useState('')
+  const [products, setProducts] = useState<Product[]>([])
   const [formKey, setFormKey] = useState(0)
 
   const load = useCallback(async () => {
@@ -31,6 +56,7 @@ export function BannersPanel() {
   }, [])
   useEffect(() => {
     load()
+    fetchAllProducts().then(setProducts).catch(() => {})
   }, [load])
 
   const run = async (fn: () => Promise<void>) => {
@@ -40,7 +66,8 @@ export function BannersPanel() {
       await fn()
       await load()
     } catch (e) {
-      setError(errMsg(e))
+      const msg = errMsg(e)
+      setError(/link/i.test(msg) ? `${msg} ¿Ejecutaste la migración 20260101000006_enlace_banners.sql?` : msg)
     } finally {
       setBusy(false)
     }
@@ -51,9 +78,10 @@ export function BannersPanel() {
     if (!file) return setError('Elige una imagen para el banner.')
     const next = (banners.at(-1)?.display_order ?? 0) + 10
     run(async () => {
-      await createBanner(file, title, next)
+      await createBanner(file, title, next, link || null)
       setFile(null)
       setTitle('')
+      setLink('')
       setFormKey((k) => k + 1)
     })
   }
@@ -94,6 +122,9 @@ export function BannersPanel() {
             onChange={(e) => setTitle(e.target.value)}
             className={`${inputCls} min-w-0 flex-1 basis-48`}
           />
+          <div className="basis-full sm:basis-auto sm:min-w-56">
+            <LinkSelect label="Al tocar el banner (opcional)" value={link} onChange={setLink} products={products} />
+          </div>
           <button type="submit" disabled={busy || !file} className={primaryBtn}>{busy ? 'Subiendo…' : 'Agregar'}</button>
         </div>
       </form>
@@ -135,6 +166,16 @@ export function BannersPanel() {
               >
                 Eliminar
               </button>
+            </div>
+            <div className="flex basis-full flex-wrap items-center gap-2">
+              <span className="text-[0.7rem] text-mute">Al tocar el banner:</span>
+              <LinkSelect
+                label={`Enlace del banner ${i + 1}`}
+                value={b.link ?? ''}
+                products={products}
+                disabled={busy}
+                onChange={(v) => run(() => updateBanner(b.id, { link: v || null }))}
+              />
             </div>
           </article>
         ))}

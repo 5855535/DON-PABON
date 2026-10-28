@@ -5,6 +5,7 @@ import { trackVisitOnce } from './lib/metrics'
 import { ProductsProvider } from './lib/ProductsContext'
 import { Footer } from './components/Footer'
 import { Navbar } from './components/Navbar'
+import { ProductDeepLink } from './components/ProductDeepLink'
 import Category from './pages/Category'
 import Home from './pages/Home'
 import NotFound from './pages/NotFound'
@@ -31,6 +32,7 @@ export default function App() {
           Saltar al contenido
         </a>
         <RouteEffects />
+        <ProductDeepLink />
         {!inAdmin && <Navbar />}
         <main id="contenido" className={inAdmin ? 'pb-10' : 'pt-14'}>
           <Suspense fallback={<div className="grid min-h-[60vh] place-items-center text-mute">Cargando…</div>}>

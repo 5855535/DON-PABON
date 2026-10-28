@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { CATEGORIES } from '../lib/categories'
+import { useVisibleCategories } from '../lib/useVisibleCategories'
 import { GENERAL_MESSAGE } from '../lib/whatsapp'
 import { Logo } from './Logo'
 import { WhatsAppButton, WhatsAppIconButton } from './WhatsAppButton'
 
-const LINKS = [{ to: '/', label: 'Inicio', end: true }, ...CATEGORIES.map((c) => ({ to: `/${c.slug}`, label: c.label, end: false }))]
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
+  const LINKS = [{ to: '/', label: 'Inicio', end: true }, ...useVisibleCategories().map((c) => ({ to: `/${c.slug}`, label: c.label, end: false }))]
   const { pathname } = useLocation()
 
   useEffect(() => {

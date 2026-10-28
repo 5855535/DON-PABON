@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchActiveBanners } from '../lib/banners'
 import { DEFAULT_FEATURED_LABEL, fetchFeaturedLabel } from '../lib/settings'
-import { CATEGORIES } from '../lib/categories'
+import { useVisibleCategories } from '../lib/useVisibleCategories'
 import { useMeta } from '../lib/useMeta'
 import { useProducts } from '../lib/ProductsContext'
 import type { Banner } from '../lib/types'
@@ -30,6 +30,7 @@ export default function Home() {
   const [banners, setBanners] = useState<Banner[] | null>(null)
   const [starOpen, setStarOpen] = useState(false)
   const [starLabel, setStarLabel] = useState(DEFAULT_FEATURED_LABEL)
+  const categories = useVisibleCategories()
   const bestsellers = products.filter((p) => p.is_bestseller).slice(0, 8)
 
   useEffect(() => {
@@ -53,7 +54,8 @@ export default function Home() {
         <div className="shimmer aspect-[16/9] rounded-2xl sm:aspect-[21/8]" aria-hidden="true" />
       )}
 
-      {/* Producto estrella */}
+      {/* Producto estrella (mientras carga se reserva su espacio para que nada salte) */}
+      {status === 'loading' && <div className="shimmer mt-4 aspect-[4/3] rounded-2xl sm:aspect-[16/7]" aria-hidden="true" />}
       {status === 'ready' && featured && (
         <section className="mt-4" aria-labelledby="estrella">
           <button
@@ -86,7 +88,7 @@ export default function Home() {
         <p className="font-script text-[1.7rem] leading-none text-accent">Tradición en cada bocado</p>
         <p className="mt-2 text-[0.85rem] text-mute">Pan fresco, recetas auténticas y el sabor de siempre.</p>
         <nav aria-label="Categorías" className="mt-3 flex flex-wrap justify-center gap-2 lg:hidden">
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <Link
               key={c.slug}
               to={`/${c.slug}`}

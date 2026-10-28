@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { getCategory } from '../lib/categories'
 import { track } from '../lib/metrics'
 import type { Product } from '../lib/types'
@@ -6,14 +6,41 @@ import { productMessage } from '../lib/whatsapp'
 import { ProductImage } from './ProductImage'
 import { WhatsAppButton } from './WhatsAppButton'
 
+const MARK = 'dpModal'
+
 export function ProductModal({ product, onClose }: { product: Product; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null)
   const touchX = useRef<number | null>(null)
+  const pushed = useRef(false)
   const category = getCategory(product.category)
   const images = [product.image_url, ...(product.gallery ?? []).map((g) => g.url)].filter((u): u is string => !!u)
   const [active, setActive] = useState(0)
   const total = Math.max(images.length, 1)
   const go = (i: number) => setActive(((i % total) + total) % total)
+
+  /**
+   * El modal ocupa una entrada del historial: así el botón "atrás" del celular lo cierra
+   * en vez de sacar al usuario de la página. Se conserva el estado del router (idx/key).
+   */
+  useEffect(() => {
+    if (history.state?.[MARK]) pushed.current = true
+    else {
+      history.pushState({ ...history.state, [MARK]: true }, '')
+      pushed.current = true
+    }
+    const onPop = () => {
+      pushed.current = false
+      onClose()
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [onClose])
+
+  /** Cierre desde la interfaz (X, fuera, Esc, «Seguir viendo»): retrocede la entrada que abrimos. */
+  const requestClose = useCallback(() => {
+    if (pushed.current) history.back() // dispara popstate → onClose
+    else onClose()
+  }, [onClose])
 
   useEffect(() => {
     const d = ref.current
@@ -32,13 +59,13 @@ export function ProductModal({ product, onClose }: { product: Product; onClose: 
       aria-labelledby="modal-title"
       onCancel={(e) => {
         e.preventDefault()
-        onClose()
+        requestClose()
       }}
       onKeyDown={(e) => {
         if (e.key === 'ArrowRight') go(active + 1)
         if (e.key === 'ArrowLeft') go(active - 1)
       }}
-      onClick={(e) => e.target === ref.current && onClose()}
+      onClick={(e) => e.target === ref.current && requestClose()}
       className="animate-fade-in mx-auto mb-0 mt-auto w-full max-w-none overflow-hidden rounded-b-none rounded-t-2xl border border-line bg-card p-0 text-ink shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.9)] backdrop:bg-black/75 sm:my-auto sm:w-[calc(100%-1.5rem)] sm:max-w-xl sm:rounded-2xl"
     >
       <div className="grid max-h-[85svh] overflow-y-auto sm:grid-cols-2">
@@ -101,7 +128,7 @@ export function ProductModal({ product, onClose }: { product: Product; onClose: 
           <p className="text-[0.82rem] leading-relaxed text-mute">{product.description || 'Horneado con ingredientes de calidad y mucho amor.'}</p>
           <div className="mt-auto flex flex-col gap-1 pt-2">
             <WhatsAppButton message={productMessage(product.name)} size="md" block source="modal" product={{ id: product.id, name: product.name }} />
-            <button type="button" onClick={onClose} className="min-h-10 rounded-full text-xs font-medium text-mute transition hover:text-ink">
+            <button type="button" onClick={requestClose} className="min-h-10 rounded-full text-xs font-medium text-mute transition hover:text-ink">
               Seguir viendo
             </button>
           </div>
@@ -109,7 +136,7 @@ export function ProductModal({ product, onClose }: { product: Product; onClose: 
       </div>
       <button
         type="button"
-        onClick={onClose}
+        onClick={requestClose}
         aria-label="Cerrar"
         className="absolute right-2.5 top-2.5 grid h-10 w-10 place-items-center rounded-full bg-bg/80 text-ink backdrop-blur transition hover:bg-accent hover:text-bg"
       >
