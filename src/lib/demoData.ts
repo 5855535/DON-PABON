@@ -19,6 +19,7 @@ const d = (
   category,
   image_url: `/demo/${file}.webp`,
   image_path: null,
+  gallery: [],
   is_featured: false,
   is_bestseller: [1, 2, 6, 9, 17, 23].includes(id),
   is_active: true,
@@ -29,7 +30,14 @@ const d = (
 })
 
 export const DEMO_PRODUCTS: Product[] = [
-  d(1, 'Pan campesino', 'Corteza crocante y miga suave, horneado cada día.', 'panes', 'campesino', { is_featured: true }),
+  d(1, 'Pan campesino', 'Corteza crocante y miga suave, horneado cada día.', 'panes', 'campesino', {
+    is_featured: true,
+    gallery: [
+      { url: '/demo/integral.webp', path: '' },
+      { url: '/demo/semillas.webp', path: '' },
+      { url: '/demo/frances.webp', path: '' },
+    ],
+  }),
   d(2, 'Pan integral', 'Con granos enteros, ideal para el desayuno.', 'panes', 'integral'),
   d(3, 'Pan de semillas', 'Mezcla de semillas tostadas y masa madre.', 'panes', 'semillas'),
   d(4, 'Pan francés', 'Ligero, dorado y perfecto para acompañar.', 'panes', 'frances'),

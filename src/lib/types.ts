@@ -1,5 +1,10 @@
 export type CategorySlug = 'panes' | 'dulces' | 'salados' | 'navideno'
 
+export interface GalleryItem {
+  url: string
+  path: string
+}
+
 export interface Product {
   id: string
   name: string
@@ -7,6 +12,8 @@ export interface Product {
   category: CategorySlug
   image_url: string | null
   image_path: string | null
+  /** Fotos adicionales (hasta 3). Con la principal suman un máximo de 4. */
+  gallery: GalleryItem[]
   is_featured: boolean
   is_bestseller: boolean
   is_active: boolean

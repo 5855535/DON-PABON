@@ -50,7 +50,7 @@ Los textos están en `src/lib/whatsapp.ts`. Tras cambiar el `.env` hay que **rec
 
 1. En <https://supabase.com> crea un proyecto.
 2. **SQL Editor** → ejecuta en orden `supabase/migrations/…_schema_productos.sql`,
-   `…_storage_imagenes.sql` y `…_banners_metricas.sql` (o usa la CLI: `supabase link` + `supabase db push`).
+   `…_storage_imagenes.sql`, `…_banners_metricas.sql` y `…_galeria_productos.sql` (o usa la CLI: `supabase link` + `supabase db push`).
 3. **Authentication → Sign In / Providers → Email**: **desactiva "Allow new users to sign up"**
    (no debe haber registro público). Aun así, registrarse nunca da permisos: solo pueden escribir
    los usuarios listados en la tabla `admins`.
@@ -104,7 +104,7 @@ enrutado SPA). Define allí `WHATSAPP_PHONE`, `VITE_SUPABASE_URL` y `VITE_SUPABA
 
 | Dónde | Proporción | Tamaño recomendado | Notas |
 |---|---|---|---|
-| Fotos de productos | 4:3 horizontal | **1200 × 900 px** (mínimo 800 × 600) | Producto centrado. Se muestra también recortada en cuadrado (producto estrella) y a 16:10 en el modal del celular. |
+| Fotos de productos (hasta 4 por producto: principal + 3 en el modal) | 4:3 horizontal | **1200 × 900 px** (mínimo 800 × 600) | Producto centrado. Se muestra también recortada en cuadrado (producto estrella) y a 16:10 en el modal del celular. |
 | Banners del inicio | 16:9 | **1600 × 900 px** | En celular se ve completo; en pantallas grandes se recorta arriba y abajo (≈ 21:8), así que deja lo importante en la franja central. |
 | Portada por defecto (`public/images/hero.webp`) | 16:9 | 1600 × 900 px | Solo se usa si no hay banners activos. |
 | Imagen al compartir en redes (`og:image`) | 1.91:1 | 1200 × 630 px | Opcional. Hoy usa `hero.webp`; para que las redes la muestren bien conviene una URL absoluta del dominio final. |

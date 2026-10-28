@@ -1,10 +1,12 @@
 import { BUCKET, DEMO_MODE, supabase } from './supabase'
 import { DEMO_PRODUCTS } from './demoData'
 import type { Product, ProductInput } from './types'
+
+export const MAX_IMAGES = 4 // principal + 3 adicionales
 import { optimizeImage } from './image'
 
 const COLS =
-  'id,name,description,category,image_url,image_path,is_featured,is_bestseller,is_active,display_order,created_at,updated_at'
+  'id,name,description,category,image_url,image_path,gallery,is_featured,is_bestseller,is_active,display_order,created_at,updated_at'
 
 export const db = () => {
   if (!supabase) throw new Error('Supabase no está configurado.')
@@ -51,25 +53,51 @@ export async function uploadImage(file: File, folder = 'products'): Promise<{ ur
   return { url: data.publicUrl, path }
 }
 
-export async function removeImage(path: string | null) {
-  if (!path) return
-  const { error } = await db().storage.from(BUCKET).remove([path])
-  if (error) console.warn('No se pudo borrar la imagen anterior:', error.message)
+export async function removeImages(paths: (string | null | undefined)[]) {
+  const list = paths.filter((p): p is string => !!p)
+  if (list.length === 0) return
+  const { error } = await db().storage.from(BUCKET).remove(list)
+  if (error) console.warn('No se pudieron borrar imágenes:', error.message)
+}
+
+export const removeImage = (path: string | null) => removeImages([path])
+
+export const productPaths = (p: Pick<Product, 'image_path' | 'gallery'>) => [p.image_path, ...(p.gallery ?? []).map((g) => g.path)]
+
+/** Un espacio de imagen del formulario: ya guardada (url/path) o nueva (file). */
+export interface ImageSlot {
+  url: string
+  path: string | null
+  file?: File
 }
 
 export interface SaveOptions {
   id?: string
   input: ProductInput
-  file?: File | null
+  /** En orden: la primera es la principal; el resto forma la galería. */
+  images: ImageSlot[]
   featured: boolean
   previous?: Product
 }
 
-export async function saveProduct({ id, input, file, featured, previous }: SaveOptions): Promise<void> {
+export async function saveProduct({ id, input, images, featured, previous }: SaveOptions): Promise<void> {
   const client = db()
-  const uploaded = file ? await uploadImage(file) : null
+  const uploadedPaths: string[] = []
+  const final: { url: string; path: string | null }[] = []
   try {
-    const imageFields = uploaded ? { image_url: uploaded.url, image_path: uploaded.path } : {}
+    for (const slot of images.slice(0, MAX_IMAGES)) {
+      if (slot.file) {
+        const up = await uploadImage(slot.file)
+        uploadedPaths.push(up.path)
+        final.push(up)
+      } else final.push({ url: slot.url, path: slot.path })
+    }
+    const [main, ...rest] = final
+    const imageFields = {
+      image_url: main?.url ?? null,
+      image_path: main?.path ?? null,
+      gallery: rest.map((r) => ({ url: r.url, path: r.path ?? '' })),
+    }
     let productId = id
     if (id) {
       const { error } = await client.from('products').update({ ...input, ...imageFields }).eq('id', id)
@@ -98,16 +126,18 @@ export async function saveProduct({ id, input, file, featured, previous }: SaveO
       if (error) throw error
     }
   } catch (e) {
-    if (uploaded) await removeImage(uploaded.path) // evita archivos huérfanos si falla la BD
+    await removeImages(uploadedPaths) // evita archivos huérfanos si falla el guardado
     throw e
   }
-  if (uploaded && previous?.image_path) await removeImage(previous.image_path)
+  // Borra del bucket las imágenes que ya no se usan
+  const keep = new Set(final.map((f) => f.path))
+  if (previous) await removeImages(productPaths(previous).filter((p) => !keep.has(p ?? null)))
 }
 
 export async function deleteProduct(product: Product): Promise<void> {
   const { error } = await db().from('products').delete().eq('id', product.id)
   if (error) throw error
-  await removeImage(product.image_path)
+  await removeImages(productPaths(product))
 }
 
 export async function setActive(id: string, is_active: boolean) {

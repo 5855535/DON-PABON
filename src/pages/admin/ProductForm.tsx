@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { CATEGORIES } from '../../lib/categories'
-import { saveProduct } from '../../lib/products'
+import { MAX_IMAGES, saveProduct, type ImageSlot } from '../../lib/products'
 import type { CategorySlug, Product } from '../../lib/types'
 import { errMsg, inputCls } from './ui'
 
@@ -11,6 +11,15 @@ interface Props {
   onSaved: () => void
 }
 
+const initialSlots = (p?: Product): ImageSlot[] => {
+  if (!p) return []
+  const main = p.image_url ? [{ url: p.image_url, path: p.image_path }] : []
+  return [...main, ...(p.gallery ?? []).map((g) => ({ url: g.url, path: g.path || null }))]
+}
+
+const miniBtn =
+  'grid h-8 min-w-8 place-items-center rounded-full bg-bg/85 px-2 text-xs font-semibold text-ink backdrop-blur transition hover:bg-accent hover:text-bg disabled:opacity-30'
+
 export function ProductForm({ product, defaultCategory, onClose, onSaved }: Props) {
   const [name, setName] = useState(product?.name ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
@@ -18,36 +27,57 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: Prop
   const [active, setActive] = useState(product?.is_active ?? true)
   const [featured, setFeatured] = useState(product?.is_featured ?? false)
   const [bestseller, setBestseller] = useState(product?.is_bestseller ?? false)
-  const [file, setFile] = useState<File | null>(null)
-  const [preview, setPreview] = useState<string | null>(product?.image_url ?? null)
+  const [slots, setSlots] = useState<ImageSlot[]>(() => initialSlots(product))
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const blobUrls = useRef<string[]>([])
 
   useEffect(() => {
     const d = dialogRef.current
     d?.showModal()
-    return () => d?.close()
+    const urls = blobUrls.current
+    return () => {
+      d?.close()
+      urls.forEach((u) => URL.revokeObjectURL(u))
+    }
   }, [])
 
-  useEffect(() => {
-    if (!file) return
-    const url = URL.createObjectURL(file)
-    setPreview(url)
-    return () => URL.revokeObjectURL(url)
-  }, [file])
+  const addFiles = (files: FileList | null) => {
+    if (!files) return
+    const room = MAX_IMAGES - slots.length
+    const picked = [...files].filter((f) => f.type.startsWith('image/')).slice(0, room)
+    if (files.length > room) setError(`Máximo ${MAX_IMAGES} imágenes por producto.`)
+    else setError(null)
+    const added = picked.map((file) => {
+      const url = URL.createObjectURL(file)
+      blobUrls.current.push(url)
+      return { url, path: null, file }
+    })
+    setSlots((s) => [...s, ...added])
+  }
+
+  const move = (i: number, dir: -1 | 1) =>
+    setSlots((s) => {
+      const j = i + dir
+      if (j < 0 || j >= s.length) return s
+      const next = [...s]
+      ;[next[i], next[j]] = [next[j], next[i]]
+      return next
+    })
+  const remove = (i: number) => setSlots((s) => s.filter((_, k) => k !== i))
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return setError('El nombre es obligatorio.')
-    if (!product && !file && !confirm('Este producto no tiene imagen. ¿Guardar de todos modos?')) return
+    if (!product && slots.length === 0 && !confirm('Este producto no tiene imagen. ¿Guardar de todos modos?')) return
     setBusy(true)
     setError(null)
     try {
       await saveProduct({
         id: product?.id,
         input: { name: name.trim(), description: description.trim() || null, category, is_active: active, is_bestseller: bestseller },
-        file,
+        images: slots,
         featured: featured && active,
         previous: product,
       })
@@ -84,19 +114,45 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: Prop
           ))}
         </select>
 
-        <p className="mt-3 text-xs font-medium">Imagen</p>
-        <div className="mt-1 flex items-center gap-3">
-          <div className="grid aspect-[4/3] w-24 shrink-0 place-items-center overflow-hidden rounded-lg border border-line bg-soft text-[0.65rem] text-mute">
-            {preview ? <img src={preview} alt="Vista previa de la imagen" className="h-full w-full object-cover" /> : 'Sin imagen'}
-          </div>
-          <div className="text-[0.7rem] text-mute">
-            <label className="inline-flex min-h-10 cursor-pointer items-center rounded-full border border-accent px-4 text-xs font-semibold text-accent transition hover:bg-accent hover:text-bg focus-within:outline focus-within:outline-2 focus-within:outline-accent">
-              {product?.image_url ? 'Reemplazar imagen' : 'Subir imagen'}
-              <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-            </label>
-            <p className="mt-1.5">Se optimiza a WebP automáticamente. Ideal: horizontal 4:3.</p>
-          </div>
-        </div>
+        <p className="mt-3 text-xs font-medium">
+          Imágenes <span className="text-mute">({slots.length}/{MAX_IMAGES}) · la primera es la principal</span>
+        </p>
+        <ul className="mt-1.5 grid grid-cols-2 gap-2">
+          {slots.map((s, i) => (
+            <li key={s.url} className="relative overflow-hidden rounded-lg border border-line bg-soft">
+              <img src={s.url} alt={`Imagen ${i + 1} del producto`} className="aspect-[4/3] w-full object-cover" />
+              {i === 0 && (
+                <span className="absolute left-1.5 top-1.5 rounded-full bg-accent px-2 py-0.5 text-[0.6rem] font-bold text-bg">Principal</span>
+              )}
+              <div className="absolute inset-x-1.5 bottom-1.5 flex items-center justify-between gap-1">
+                <span className="flex gap-1">
+                  <button type="button" className={miniBtn} disabled={i === 0} onClick={() => move(i, -1)} aria-label={`Mover imagen ${i + 1} antes`}>←</button>
+                  <button type="button" className={miniBtn} disabled={i === slots.length - 1} onClick={() => move(i, 1)} aria-label={`Mover imagen ${i + 1} después`}>→</button>
+                </span>
+                <button type="button" className={`${miniBtn} hover:!bg-red-500 hover:!text-white`} onClick={() => remove(i)} aria-label={`Quitar imagen ${i + 1}`}>✕</button>
+              </div>
+            </li>
+          ))}
+          {slots.length < MAX_IMAGES && (
+            <li>
+              <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-accent/60 text-center text-xs font-semibold text-accent transition hover:bg-accent/10 focus-within:outline focus-within:outline-2 focus-within:outline-accent">
+                <span className="text-xl leading-none" aria-hidden="true">＋</span>
+                Agregar imagen
+                <input
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  className="sr-only"
+                  onChange={(e) => {
+                    addFiles(e.target.files)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+            </li>
+          )}
+        </ul>
+        <p className="mt-1.5 text-[0.7rem] text-mute">Se optimizan a WebP automáticamente. Ideal: horizontal 4:3 (1200 × 900 px).</p>
 
         <div className="mt-3 flex flex-col">
           <label className="flex min-h-10 items-center gap-3 text-sm">
