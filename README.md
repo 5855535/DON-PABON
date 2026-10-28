@@ -121,6 +121,14 @@ node scripts/qr-pan.mjs https://TU-SITIO.netlify.app
 Genera en `qr/` el QR (pan de molde) en versión oscura y clara, en SVG (vectorial, para imprenta) y PNG (1500 px),
 y comprueba automáticamente que se pueda leer. Tamaño de impresión mínimo recomendado: 4 × 4 cm la zona del código.
 
+## Póster de promoción
+
+```bash
+node scripts/poster.mjs https://TU-SITIO.netlify.app [foto-portada.webp]
+```
+
+Genera en `poster/` un póster A4 vertical (2480 × 3508 px, para imprimir) y una versión para historias/estados (1080 × 1920 px), ambos con el QR en forma de pan. Por defecto usa `public/images/hero.webp` de fondo; pasa una foto propia de mayor resolución como segundo argumento para mejor calidad de impresión.
+
 ## Pruebas realizadas
 
 - `npm run build` (tsc + vite) sin errores.
