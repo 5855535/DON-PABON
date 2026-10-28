@@ -85,9 +85,6 @@ export function Navbar() {
               </li>
             ))}
           </ul>
-          <div className="mx-auto mt-6 max-w-md">
-            <WhatsAppButton message={GENERAL_MESSAGE} size="lg" block source="menu" />
-          </div>
         </div>
       )}
     </header>

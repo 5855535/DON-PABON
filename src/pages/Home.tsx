@@ -5,11 +5,10 @@ import { CATEGORIES } from '../lib/categories'
 import { useMeta } from '../lib/useMeta'
 import { useProducts } from '../lib/ProductsContext'
 import type { Banner } from '../lib/types'
-import { GENERAL_MESSAGE, productMessage } from '../lib/whatsapp'
 import { BannerCarousel } from '../components/BannerCarousel'
 import { ProductCard } from '../components/ProductCard'
 import { ProductImage } from '../components/ProductImage'
-import { WhatsAppButton } from '../components/WhatsAppButton'
+import { ProductModal } from '../components/ProductModal'
 
 /** Si no hay banners cargados (o falla la conexión) se muestra esta portada por defecto. */
 const DEFAULT_BANNER: Banner = {
@@ -28,6 +27,7 @@ export default function Home() {
   )
   const { products, featured, status } = useProducts()
   const [banners, setBanners] = useState<Banner[] | null>(null)
+  const [starOpen, setStarOpen] = useState(false)
   const bestsellers = products.filter((p) => p.is_bestseller).slice(0, 8)
 
   useEffect(() => {
@@ -54,10 +54,7 @@ export default function Home() {
       <section className="mt-5 text-center">
         <p className="font-script text-[1.7rem] leading-none text-accent">Tradición en cada bocado</p>
         <p className="mt-2 text-[0.85rem] text-mute">Pan fresco, recetas auténticas y el sabor de siempre.</p>
-        <div className="mt-4 flex justify-center">
-          <WhatsAppButton message={GENERAL_MESSAGE} size="md" source="inicio" />
-        </div>
-        <nav aria-label="Categorías" className="mt-4 flex flex-wrap justify-center gap-2 lg:hidden">
+        <nav aria-label="Categorías" className="mt-3 flex flex-wrap justify-center gap-2 lg:hidden">
           {CATEGORIES.map((c) => (
             <Link
               key={c.slug}
@@ -87,17 +84,21 @@ export default function Home() {
       {/* Producto estrella */}
       {status === 'ready' && featured && (
         <section className="mt-9" aria-labelledby="estrella">
-          <div className="flex overflow-hidden rounded-2xl border border-line bg-card">
-            <ProductImage src={featured.image_url} alt={featured.name} className="aspect-square w-[38%] shrink-0 sm:w-44" />
-            <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
-              <span className="w-fit text-[0.62rem] font-bold tracking-[0.18em] text-accent">★ EL FAVORITO DE LA CASA</span>
-              <h2 id="estrella" className="text-lg font-extrabold leading-tight">{featured.name}</h2>
-              {featured.description && <p className="line-clamp-2 text-[0.8rem] text-mute">{featured.description}</p>}
-              <div className="pt-1.5">
-                <WhatsAppButton message={productMessage(featured.name)} size="sm" source="estrella" product={{ id: featured.id, name: featured.name }} />
-              </div>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => setStarOpen(true)}
+            aria-label={`Ver ${featured.name}`}
+            className="group flex w-full overflow-hidden rounded-2xl border border-line bg-card text-left transition hover:border-accent/50"
+          >
+            <ProductImage src={featured.image_url} alt="" className="aspect-square w-[34%] shrink-0 sm:w-40" />
+            <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 p-4">
+              <span className="text-[0.62rem] font-bold tracking-[0.18em] text-accent">★ EL FAVORITO DE LA CASA</span>
+              <span id="estrella" className="text-base font-extrabold leading-tight">{featured.name}</span>
+              {featured.description && <span className="line-clamp-2 text-[0.78rem] text-mute">{featured.description}</span>}
+              <span className="mt-1 text-xs font-semibold text-accent transition group-hover:translate-x-1">Ver producto →</span>
+            </span>
+          </button>
+          {starOpen && <ProductModal product={featured} onClose={() => setStarOpen(false)} />}
         </section>
       )}
     </div>

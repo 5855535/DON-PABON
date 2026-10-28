@@ -2,9 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { CATEGORIES, getCategory } from '../lib/categories'
 import { useMeta } from '../lib/useMeta'
 import { useProducts } from '../lib/ProductsContext'
-import { GENERAL_MESSAGE } from '../lib/whatsapp'
 import { ProductGrid } from '../components/ProductGrid'
-import { WhatsAppButton } from '../components/WhatsAppButton'
 import NotFound from './NotFound'
 
 export default function Category() {
@@ -30,10 +28,7 @@ export default function Category() {
         <ProductGrid products={byCategory(cat.slug)} />
       </section>
 
-      <aside className="mt-8 flex flex-col items-center justify-between gap-3 rounded-2xl border border-line bg-card px-5 py-5 text-center sm:flex-row sm:text-left">
-        <p className="font-script text-2xl leading-tight text-accent">{cat.bannerPhrase} ♡</p>
-        <WhatsAppButton message={GENERAL_MESSAGE} size="md" source={`categoria-${cat.slug}`} />
-      </aside>
+      <p className="mt-8 text-center font-script text-2xl leading-tight text-accent">{cat.bannerPhrase} ♡</p>
 
       <nav aria-label="Otras categorías" className="mt-5 flex flex-wrap justify-center gap-2">
         {CATEGORIES.filter((c) => c.slug !== cat.slug).map((c) => (
