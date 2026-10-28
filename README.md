@@ -50,7 +50,7 @@ Los textos están en `src/lib/whatsapp.ts`. Tras cambiar el `.env` hay que **rec
 
 1. En <https://supabase.com> crea un proyecto.
 2. **SQL Editor** → ejecuta en orden `supabase/migrations/…_schema_productos.sql`,
-   `…_storage_imagenes.sql`, `…_banners_metricas.sql` y `…_galeria_productos.sql` (o usa la CLI: `supabase link` + `supabase db push`).
+   `…_storage_imagenes.sql`, `…_banners_metricas.sql`, `…_galeria_productos.sql` y `…_ajustes_sitio.sql` (o usa la CLI: `supabase link` + `supabase db push`).
 3. **Authentication → Sign In / Providers → Email**: **desactiva "Allow new users to sign up"**
    (no debe haber registro público). Aun así, registrarse nunca da permisos: solo pueden escribir
    los usuarios listados en la tabla `admins`.
@@ -76,7 +76,7 @@ Los textos están en `src/lib/whatsapp.ts`. Tras cambiar el `.env` hay que **rec
 
 Tres pestañas:
 
-- **Productos**: crear/editar/eliminar, categoría, activar/ocultar, **producto estrella**, **Más pedido** (los marcados aparecen en el inicio, hasta 8), reordenar (↑ ↓),
+- **Productos**: crear/editar/eliminar, categoría, activar/ocultar, **producto estrella** (con el texto de su etiqueta editable, p. ej. «Recomendado del chef»), **Más pedido** (los marcados aparecen en el inicio, hasta 8), reordenar (↑ ↓),
 subir/reemplazar imagen (se redimensiona a ≤1600 px y se convierte a **WebP** en el navegador; la imagen
 anterior se borra del bucket y, si falla el guardado, se elimina la recién subida para no dejar huérfanos) y
 «Vista previa» del catálogo público.

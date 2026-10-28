@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchActiveBanners } from '../lib/banners'
+import { DEFAULT_FEATURED_LABEL, fetchFeaturedLabel } from '../lib/settings'
 import { CATEGORIES } from '../lib/categories'
 import { useMeta } from '../lib/useMeta'
 import { useProducts } from '../lib/ProductsContext'
@@ -28,10 +29,12 @@ export default function Home() {
   const { products, featured, status } = useProducts()
   const [banners, setBanners] = useState<Banner[] | null>(null)
   const [starOpen, setStarOpen] = useState(false)
+  const [starLabel, setStarLabel] = useState(DEFAULT_FEATURED_LABEL)
   const bestsellers = products.filter((p) => p.is_bestseller).slice(0, 8)
 
   useEffect(() => {
     let alive = true
+    fetchFeaturedLabel().then((l) => alive && setStarLabel(l))
     fetchActiveBanners()
       .then((b) => alive && setBanners(b.length ? b : [DEFAULT_BANNER]))
       .catch(() => alive && setBanners([DEFAULT_BANNER]))
@@ -56,15 +59,22 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setStarOpen(true)}
-            aria-label={`Ver ${featured.name}`}
-            className="group flex w-full overflow-hidden rounded-2xl border border-accent/40 bg-card text-left shadow-[0_10px_30px_-18px_rgb(235_166_93/0.5)] transition hover:border-accent"
+            aria-label={`${starLabel}: ver ${featured.name}`}
+            className="group relative block w-full overflow-hidden rounded-2xl border border-accent/40 bg-card text-left shadow-[0_10px_30px_-18px_rgb(235_166_93/0.5)] transition hover:border-accent"
           >
-            <ProductImage src={featured.image_url} alt="" className="aspect-square w-[34%] shrink-0 sm:w-40" />
-            <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 p-4">
-              <span className="text-[0.62rem] font-bold tracking-[0.18em] text-accent">★ EL FAVORITO DE LA CASA</span>
-              <span id="estrella" className="text-base font-extrabold leading-tight">{featured.name}</span>
-              {featured.description && <span className="line-clamp-2 text-[0.78rem] text-mute">{featured.description}</span>}
-              <span className="mt-1 text-xs font-semibold text-accent transition group-hover:translate-x-1">Ver producto →</span>
+            <ProductImage src={featured.image_url} alt="" eager className="aspect-[4/3] w-full sm:aspect-[16/7]" />
+            <span className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/85 via-black/45 to-transparent" aria-hidden="true" />
+            <span className="absolute left-3 top-3 max-w-[80%] truncate rounded-full bg-accent px-3 py-1 text-[0.65rem] font-extrabold tracking-[0.12em] text-bg">
+              ★ {starLabel.toUpperCase()}
+            </span>
+            <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
+              <span className="min-w-0">
+                <span id="estrella" className="block text-xl font-extrabold leading-tight text-ink sm:text-2xl">{featured.name}</span>
+                {featured.description && <span className="mt-0.5 line-clamp-2 block text-[0.8rem] text-ink/80">{featured.description}</span>}
+              </span>
+              <span className="shrink-0 rounded-full border border-accent/70 bg-bg/60 px-3.5 py-2 text-xs font-bold text-accent backdrop-blur transition group-hover:bg-accent group-hover:text-bg">
+                Ver →
+              </span>
             </span>
           </button>
           {starOpen && <ProductModal product={featured} onClose={() => setStarOpen(false)} />}

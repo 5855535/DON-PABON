@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { CATEGORIES } from '../../lib/categories'
 import { clearFeatured, deleteProduct, fetchAllProducts, saveOrder, setActive, setBestseller, setFeatured } from '../../lib/products'
 import { useProducts } from '../../lib/ProductsContext'
 import type { CategorySlug, Product } from '../../lib/types'
 import { ProductImage } from '../../components/ProductImage'
+import { DEFAULT_FEATURED_LABEL, fetchFeaturedLabel, saveFeaturedLabel } from '../../lib/settings'
 import { ProductForm } from './ProductForm'
-import { btn, errMsg, primaryBtn } from './ui'
+import { btn, errMsg, inputCls, primaryBtn } from './ui'
 
 export function ProductsPanel() {
   const { reload } = useProducts()
@@ -14,6 +15,24 @@ export function ProductsPanel() {
   const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState<CategorySlug>('panes')
   const [editing, setEditing] = useState<Product | 'new' | null>(null)
+  const [label, setLabel] = useState(DEFAULT_FEATURED_LABEL)
+  const [labelMsg, setLabelMsg] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchFeaturedLabel().then(setLabel)
+  }, [])
+
+  const submitLabel = async (e: FormEvent) => {
+    e.preventDefault()
+    setLabelMsg(null)
+    try {
+      await saveFeaturedLabel(label)
+      if (!label.trim()) setLabel(DEFAULT_FEATURED_LABEL)
+      setLabelMsg('Guardado ✓')
+    } catch (err) {
+      setLabelMsg(errMsg(err, 'No se pudo guardar.'))
+    }
+  }
 
   const load = useCallback(async () => {
     try {
@@ -66,6 +85,26 @@ export function ProductsPanel() {
         Estrella: <strong className="text-accent">{star ? star.name : 'ninguno'}</strong> · Más pedidos en el inicio:{' '}
         <strong className="text-accent">{bestCount}</strong> (se muestran hasta 8)
       </p>
+
+      <form onSubmit={submitLabel} className="mt-3 rounded-xl border border-line bg-card p-3">
+        <label htmlFor="star-label" className="text-xs font-medium">Texto de la etiqueta del producto estrella</label>
+        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+          <input
+            id="star-label"
+            value={label}
+            maxLength={40}
+            onChange={(e) => {
+              setLabel(e.target.value)
+              setLabelMsg(null)
+            }}
+            placeholder={DEFAULT_FEATURED_LABEL}
+            className={`${inputCls} min-w-0 flex-1 basis-48`}
+          />
+          <button type="submit" className={primaryBtn}>Guardar</button>
+          {labelMsg && <span role="status" className="text-xs text-mute">{labelMsg}</span>}
+        </div>
+        <p className="mt-1 text-[0.7rem] text-mute">Ej.: «Recomendado del chef», «Lo más pedido». Déjalo vacío para volver a «{DEFAULT_FEATURED_LABEL}».</p>
+      </form>
 
       <div role="tablist" aria-label="Categorías" className="mt-3 flex flex-wrap items-center gap-2">
         {CATEGORIES.map((c) => (
