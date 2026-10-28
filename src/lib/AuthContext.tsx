@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
+import { pauseTracking } from './metrics'
 
 interface Ctx {
   loading: boolean
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!alive) return
       setSession(s)
       setIsAdmin(admin)
+      pauseTracking(admin)
       setLoading(false)
     }
     supabase.auth.getSession().then(({ data }) => apply(data.session)).catch(() => alive && setLoading(false))

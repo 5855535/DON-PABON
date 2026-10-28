@@ -4,7 +4,7 @@ import { useMeta } from '../lib/useMeta'
 export default function NotFound() {
   useMeta('Página no encontrada — DON PABON', 'La página que buscas no existe.', true)
   return (
-    <section className="mx-auto max-w-xl px-4 py-32 text-center">
+    <section className="mx-auto max-w-xl px-4 py-20 text-center">
       <p className="font-script text-5xl text-accent">Ups…</p>
       <h1 className="mt-3 text-3xl font-extrabold">No encontramos esta página</h1>
       <p className="mt-3 text-mute">Pero seguro encuentras algo delicioso en nuestro catálogo.</p>

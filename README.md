@@ -49,8 +49,8 @@ Los textos están en `src/lib/whatsapp.ts`. Tras cambiar el `.env` hay que **rec
 ## 3. Crear el proyecto Supabase (plan gratuito)
 
 1. En <https://supabase.com> crea un proyecto.
-2. **SQL Editor** → ejecuta en orden `supabase/migrations/…_schema_productos.sql` y luego
-   `…_storage_imagenes.sql` (o usa la CLI: `supabase link` + `supabase db push`).
+2. **SQL Editor** → ejecuta en orden `supabase/migrations/…_schema_productos.sql`,
+   `…_storage_imagenes.sql` y `…_banners_metricas.sql` (o usa la CLI: `supabase link` + `supabase db push`).
 3. **Authentication → Sign In / Providers → Email**: **desactiva "Allow new users to sign up"**
    (no debe haber registro público). Aun así, registrarse nunca da permisos: solo pueden escribir
    los usuarios listados en la tabla `admins`.
@@ -74,10 +74,14 @@ Los textos están en `src/lib/whatsapp.ts`. Tras cambiar el `.env` hay que **rec
 
 ## 4. Panel de administración (`/admin`)
 
-Login, crear/editar/eliminar productos, categoría, activar/ocultar, **producto estrella**, reordenar (↑ ↓),
+Tres pestañas:
+
+- **Productos**: crear/editar/eliminar, categoría, activar/ocultar, **producto estrella**, **Más pedido** (los marcados aparecen en el inicio, hasta 8), reordenar (↑ ↓),
 subir/reemplazar imagen (se redimensiona a ≤1600 px y se convierte a **WebP** en el navegador; la imagen
 anterior se borra del bucket y, si falla el guardado, se elimina la recién subida para no dejar huérfanos) y
 «Vista previa» del catálogo público.
+- **Banners**: imágenes que giran en el inicio deslizando a la izquierda (agregar, reemplazar, texto opcional, orden, ocultar, eliminar). Recomendado 16:9. Sin banners activos se usa la portada por defecto.
+- **Métricas**: visitas (sesiones), visitantes únicos, clics en WhatsApp, productos vistos, serie por día y productos con más interés (7/30/90 días). Son eventos anónimos (id aleatorio por navegador, sin datos personales); las visitas de admins no cuentan.
 
 ## 5. Publicar
 

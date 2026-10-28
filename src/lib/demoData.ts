@@ -20,6 +20,7 @@ const d = (
   image_url: `/demo/${file}.webp`,
   image_path: null,
   is_featured: false,
+  is_bestseller: [1, 2, 6, 9, 17, 23].includes(id),
   is_active: true,
   display_order: id * 10,
   created_at: '2026-01-01T00:00:00Z',

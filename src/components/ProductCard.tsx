@@ -15,13 +15,13 @@ export function ProductCard({ product }: { product: Product }) {
         className="group animate-fade-up flex w-full flex-col overflow-hidden rounded-xl border border-line bg-card text-left transition duration-300 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_18px_40px_-20px_rgb(0_0_0/0.8)]"
       >
         <ProductImage src={product.image_url} alt="" className="aspect-[4/3] w-full" />
-        <span className="flex min-h-12 items-center justify-between gap-2 px-3.5 py-3">
-          <span className="text-[0.92rem] font-bold leading-tight text-ink">{product.name}</span>
+        <span className="flex min-h-10 items-center justify-between gap-2 px-3 py-2.5">
+          <span className="text-[0.82rem] font-semibold leading-tight text-ink">{product.name}</span>
           <span
             aria-hidden="true"
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-accent/60 text-accent transition group-hover:bg-accent group-hover:text-bg"
+            className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-accent/60 text-accent transition group-hover:bg-accent group-hover:text-bg"
           >
-            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
           </span>

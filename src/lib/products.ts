@@ -4,9 +4,9 @@ import type { Product, ProductInput } from './types'
 import { optimizeImage } from './image'
 
 const COLS =
-  'id,name,description,category,image_url,image_path,is_featured,is_active,display_order,created_at,updated_at'
+  'id,name,description,category,image_url,image_path,is_featured,is_bestseller,is_active,display_order,created_at,updated_at'
 
-const db = () => {
+export const db = () => {
   if (!supabase) throw new Error('Supabase no está configurado.')
   return supabase
 }
@@ -36,10 +36,11 @@ export async function fetchAllProducts(): Promise<Product[]> {
   return data as Product[]
 }
 
-async function uploadImage(file: File): Promise<{ url: string; path: string }> {
+/** Optimiza (WebP ≤1600 px) y sube una imagen al bucket. */
+export async function uploadImage(file: File, folder = 'products'): Promise<{ url: string; path: string }> {
   const blob = await optimizeImage(file)
   const ext = blob.type === 'image/webp' ? 'webp' : 'jpg'
-  const path = `products/${crypto.randomUUID()}.${ext}`
+  const path = `${folder}/${crypto.randomUUID()}.${ext}`
   const { error } = await db().storage.from(BUCKET).upload(path, blob, {
     contentType: blob.type,
     cacheControl: '31536000',
@@ -50,7 +51,7 @@ async function uploadImage(file: File): Promise<{ url: string; path: string }> {
   return { url: data.publicUrl, path }
 }
 
-async function removeImage(path: string | null) {
+export async function removeImage(path: string | null) {
   if (!path) return
   const { error } = await db().storage.from(BUCKET).remove([path])
   if (error) console.warn('No se pudo borrar la imagen anterior:', error.message)
@@ -112,6 +113,11 @@ export async function deleteProduct(product: Product): Promise<void> {
 export async function setActive(id: string, is_active: boolean) {
   const patch = is_active ? { is_active } : { is_active, is_featured: false }
   const { error } = await db().from('products').update(patch).eq('id', id)
+  if (error) throw error
+}
+
+export async function setBestseller(id: string, is_bestseller: boolean) {
+  const { error } = await db().from('products').update({ is_bestseller }).eq('id', id)
   if (error) throw error
 }
 

@@ -8,7 +8,7 @@ const inputCls =
   'min-h-12 w-full rounded-xl border border-line bg-soft px-4 text-ink placeholder:text-mute/60 focus:border-accent focus:outline-none'
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <section className="mx-auto max-w-md px-4 py-20">{children}</section>
+  return <section className="mx-auto max-w-md px-4 py-12">{children}</section>
 }
 
 function Login() {

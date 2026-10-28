@@ -1,3 +1,4 @@
+import { track } from '../lib/metrics'
 import { whatsappUrl } from '../lib/whatsapp'
 
 export function WhatsAppIcon({ className = 'h-5 w-5' }: { className?: string }) {
@@ -11,35 +12,49 @@ export function WhatsAppIcon({ className = 'h-5 w-5' }: { className?: string }) 
 interface Props {
   message: string
   label?: string
-  size?: 'md' | 'lg' | 'sm'
+  size?: 'sm' | 'md' | 'lg'
   block?: boolean
   className?: string
-  trailingArrow?: boolean
+  /** Para métricas: de dónde viene el clic y, si aplica, a qué producto pertenece. */
+  source: string
+  product?: { id?: string; name?: string }
 }
 
 const sizes = {
-  sm: 'min-h-11 px-4 text-[0.8rem]',
-  md: 'min-h-12 px-5 text-sm',
-  lg: 'min-h-14 px-7 text-base',
+  sm: 'min-h-10 px-4 text-xs',
+  md: 'min-h-11 px-5 text-[0.82rem]',
+  lg: 'min-h-12 px-6 text-sm',
 }
 
 /** Único estilo de botón de WhatsApp de todo el sitio. */
-export function WhatsAppButton({ message, label = 'Pedir por WhatsApp', size = 'md', block, className = '', trailingArrow }: Props) {
+export function WhatsAppButton({ message, label = 'Pedir por WhatsApp', size = 'md', block, className = '', source, product }: Props) {
   return (
     <a
       href={whatsappUrl(message)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${label} (se abre en una pestaña nueva)`}
-      className={`group inline-flex items-center justify-center gap-2.5 rounded-full bg-accent font-bold text-bg shadow-[0_6px_24px_-8px_rgb(235_166_93/0.6)] transition duration-300 hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[0_10px_28px_-8px_rgb(235_166_93/0.75)] active:translate-y-0 ${sizes[size]} ${block ? 'w-full' : ''} ${className}`}
+      onClick={() => track('whatsapp_click', product, source)}
+      className={`inline-flex items-center justify-center gap-2 rounded-full bg-accent font-bold text-bg shadow-[0_4px_18px_-8px_rgb(235_166_93/0.6)] transition duration-300 hover:bg-accent-hover active:scale-[0.98] ${sizes[size]} ${block ? 'w-full' : ''} ${className}`}
     >
-      <WhatsAppIcon className={size === 'lg' ? 'h-6 w-6' : 'h-5 w-5'} />
+      <WhatsAppIcon className="h-[1.1em] w-[1.1em]" />
       <span>{label}</span>
-      {trailingArrow && (
-        <svg viewBox="0 0 24 24" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
-      )}
+    </a>
+  )
+}
+
+/** Acceso rápido solo con icono (barra superior en móvil). */
+export function WhatsAppIconButton({ message, source }: { message: string; source: string }) {
+  return (
+    <a
+      href={whatsappUrl(message)}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Pedir por WhatsApp (se abre en una pestaña nueva)"
+      onClick={() => track('whatsapp_click', undefined, source)}
+      className="grid h-10 w-10 place-items-center rounded-full bg-accent text-bg transition hover:bg-accent-hover active:scale-95"
+    >
+      <WhatsAppIcon className="h-5 w-5" />
     </a>
   )
 }

@@ -2,7 +2,7 @@ import { useProducts } from '../lib/ProductsContext'
 import type { Product } from '../lib/types'
 import { ProductCard, ProductCardSkeleton } from './ProductCard'
 
-const GRID = 'grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4'
+const GRID = 'grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 lg:grid-cols-4'
 
 export function ProductGrid({ products, emptyText = 'Aún no hay productos en esta categoría.' }: { products: Product[]; emptyText?: string }) {
   const { status, reload } = useProducts()
@@ -18,7 +18,7 @@ export function ProductGrid({ products, emptyText = 'Aún no hay productos en es
 
   if (status === 'error')
     return (
-      <div role="alert" className="rounded-xl border border-line bg-card px-6 py-12 text-center">
+      <div role="alert" className="rounded-xl border border-line bg-card px-5 py-8 text-center">
         <p className="text-lg font-bold">No pudimos cargar los productos</p>
         <p className="mx-auto mt-2 max-w-md text-sm text-mute">Revisa tu conexión a internet e inténtalo de nuevo.</p>
         <button
@@ -33,7 +33,7 @@ export function ProductGrid({ products, emptyText = 'Aún no hay productos en es
 
   if (products.length === 0)
     return (
-      <div className="rounded-xl border border-dashed border-line bg-card/50 px-6 py-14 text-center">
+      <div className="rounded-xl border border-dashed border-line bg-card/50 px-5 py-8 text-center">
         <p className="font-script text-3xl text-accent">Pronto, más sabores</p>
         <p className="mt-2 text-sm text-mute">{emptyText}</p>
       </div>
@@ -42,7 +42,7 @@ export function ProductGrid({ products, emptyText = 'Aún no hay productos en es
   return (
     <ul className={GRID}>
       {products.map((p) => (
-        <li key={p.id}>
+        <li key={p.id} className="flex">
           <ProductCard product={p} />
         </li>
       ))}
